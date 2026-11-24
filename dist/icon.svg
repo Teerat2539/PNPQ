@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#27272A"/><stop offset="1" stop-color="#09090B"/>
+    </linearGradient>
+  </defs>
+  <!-- squircle -->
+  <path fill="url(#bg)" d="M256 0C60 0 0 60 0 256s60 256 256 256 256-60 256-256S452 0 256 0z"/>
+  <!-- gold shield frame -->
+  <path fill="none" stroke="#F59E0B" stroke-width="16" stroke-linejoin="round"
+        d="M256 84l140 48v104c0 96-60 164-140 196-80-32-140-100-140-196V132z"/>
+  <!-- olive branches -->
+  <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round">
+    <path d="M190 360c-36-28-52-70-44-122"/><path d="M322 360c36-28 52-70 44-122"/>
+  </g>
+  <g fill="#fff">
+    <ellipse cx="150" cy="262" rx="7" ry="16" transform="rotate(-25 150 262)"/>
+    <ellipse cx="158" cy="300" rx="7" ry="16" transform="rotate(-45 158 300)"/>
+    <ellipse cx="176" cy="334" rx="7" ry="16" transform="rotate(-60 176 334)"/>
+    <ellipse cx="362" cy="262" rx="7" ry="16" transform="rotate(25 362 262)"/>
+    <ellipse cx="354" cy="300" rx="7" ry="16" transform="rotate(45 354 300)"/>
+    <ellipse cx="336" cy="334" rx="7" ry="16" transform="rotate(60 336 334)"/>
+  </g>
+  <!-- vintage microphone -->
+  <rect x="218" y="168" width="76" height="104" rx="38" fill="#fff"/>
+  <g stroke="#27272A" stroke-width="5"><path d="M224 196h64M220 220h72M224 244h64"/></g>
+  <path d="M206 250c0 32 22 52 50 52s50-20 50-52" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M256 302v42M228 352h56" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+</svg>

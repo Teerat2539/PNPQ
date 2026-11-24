@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function myData() { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
+    // Permanent admin: isAdmin == true. Temporary admin: adminUntil still in the future.
+    function isFullAdmin() { return signedIn() && myData().isAdmin == true; }
+    function isAdmin() {
+      return isFullAdmin() || (signedIn() && myData().get('adminUntil', null) is timestamp
+        && myData().adminUntil > request.time);
+    }
+    function touchesAdminFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'adminUntil']);
+    }
+    function changedOnly(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+    function validNickname() {
+      return request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 20;
+    }
+    function validAvatar() {
+      return request.resource.data.get('avatar', {}) is map && request.resource.data.get('avatar', {}).size() <= 15
+        && request.resource.data.roles is list && request.resource.data.roles.size() > 0;
+    }
+    function firstRun() {
+      return !exists(/databases/$(db)/documents/meta/init)
+        && existsAfter(/databases/$(db)/documents/meta/init);
+    }
+
+    match /meta/init {
+      allow read: if true; // login screen checks whether first-run setup is needed
+      allow create: if signedIn() && !exists(/databases/$(db)/documents/meta/init);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      // Only the first-run setup may create an admin; members added later start as non-admins.
+      allow create: if (isAdmin() && request.resource.data.isAdmin == false
+          && request.resource.data.get('adminUntil', null) == null)
+        || (request.auth.uid == uid && firstRun());
+      // Only permanent admins grant/revoke admin; temporary admins can edit everything else.
+      // Members may only move gig counters (done by the gig save transaction).
+      // Everyone may change their own nickname and avatar; admins may rename anyone.
+      allow update: if validNickname() && validAvatar() && (isFullAdmin() || (isAdmin() && !touchesAdminFields())
+        || (request.auth.uid == uid && changedOnly(['nickname', 'avatar']))
+        || (signedIn() && changedOnly(['totalGigs', 'isNew'])));
+      allow delete: if isFullAdmin() || (isAdmin() && resource.data.isAdmin != true);
+    }
+
+    // username -> login email map; readable before sign-in so the login screen can use it.
+    match /usernames/{name} {
+      allow get: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /gigs/{id} {
+      allow read, create, update: if signedIn();
+      allow delete: if isAdmin();
+    }
+  }
+}
